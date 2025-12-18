@@ -1,0 +1,69 @@
+name: Build & Sync Directus Extensions to Railway S3
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-sync:
+    runs-on: ubuntu-latest
+
+    env:
+      EXT_DIR: directus/extensions
+      AWS_ACCESS_KEY_ID: ${{ secrets.RAILWAY_S3_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.RAILWAY_S3_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      S3_BUCKET: ${{ secrets.RAILWAY_S3_BUCKET }}
+      S3_ENDPOINT: ${{ secrets.RAILWAY_S3_ENDPOINT }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build each extension
+        shell: bash
+        run: |
+          set -eux
+          for ext in "${EXT_DIR}"/*; do
+            [ -d "$ext" ] || continue
+            [ -f "$ext/package.json" ] || continue
+
+            echo "-> Building $(basename "$ext")"
+            pushd "$ext" >/dev/null
+
+            if [ -f package-lock.json ]; then
+              npm ci || npm install
+            else
+              npm install
+            fi
+
+            npm run build
+            popd >/dev/null
+          done
+
+      - name: Install AWS CLI v2
+        shell: bash
+        run: |
+          set -eux
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip -q awscliv2.zip
+          sudo ./aws/install
+          aws --version
+
+      - name: Sync build artifacts to Railway S3
+        shell: bash
+        run: |
+          set -eux
+          aws s3 sync "${EXT_DIR}" "s3://${S3_BUCKET}/extensions" \
+            --endpoint-url "${S3_ENDPOINT}" \
+            --no-follow-symlinks \
+            --exclude "*" \
+            --exclude ".registry/**" \
+            --include "*/dist/**" \
+            --include "*/manifest.json" \
+            --include "*/package.json" \
+            --delete
