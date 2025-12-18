@@ -58,7 +58,7 @@ jobs:
         shell: bash
         run: |
           set -eux
-          aws s3 sync "${EXT_DIR}" "s3://${S3_BUCKET}" \
+          aws s3 sync "${EXT_DIR}" "s3://${S3_BUCKET}/extensions" \
             --endpoint-url "${S3_ENDPOINT}" \
             --no-follow-symlinks \
             --exclude "*" \
