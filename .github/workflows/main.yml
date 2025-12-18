@@ -63,7 +63,9 @@ jobs:
             --no-follow-symlinks \
             --exclude "*" \
             --exclude ".registry/**" \
+            --exclude "node_modules/**" \
             --exclude "*/node_modules/**" \
+            --exclude "**/node_modules/**" \
             --include "*/dist/**" \
             --include "*/manifest.json" \
             --include "*/package.json" \
