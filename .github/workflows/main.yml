@@ -62,11 +62,11 @@ jobs:
             --endpoint-url "${S3_ENDPOINT}" \
             --no-follow-symlinks \
             --exclude "*" \
+            --include "*/dist/**" \
+            --include "*/manifest.json" \
+            --include "*/package.json" \
             --exclude ".registry/**" \
             --exclude "node_modules/**" \
             --exclude "*/node_modules/**" \
             --exclude "**/node_modules/**" \
-            --include "*/dist/**" \
-            --include "*/manifest.json" \
-            --include "*/package.json" \
             --delete
