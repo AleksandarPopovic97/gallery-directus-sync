@@ -30,7 +30,9 @@ services:
       start_period: 30s
 
   directus:
-    image: directus/directus:11.12.0
+    # image: directus/directus:11.12.0
+    build:
+      context: ./
     ports:
       - ${DIRECTUS_PORT}:8055
     volumes:
@@ -50,6 +52,7 @@ services:
       # DB_DATABASE: ${DB_DATABASE}
       # DB_USER: ${DB_USER}
       # DB_PASSWORD: ${DB_PASSWORD}
+      ENVIRONMENT: ${ENVIRONMENT}
       DB_CLIENT: ${DB_CLIENT}
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
@@ -92,3 +95,16 @@ services:
       EMAIL_SMTP_PORT: ${EMAIL_SMTP_PORT}
       EMAIL_SMTP_USER: ${EMAIL_SMTP_USER}
       EMAIL_SMTP_PASSWORD: ${EMAIL_SMTP_PASSWORD}
+
+  # extensions-builder:
+  #   image: node:20-alpine
+  #   container_name: directus-extensions-builder
+  #   working_dir: /extensions
+  #   volumes:
+  #     - ./extensions:/directus/extensions
+  #   command: sh -c "
+  #     corepack enable &&
+  #     npm i -g @directus/extensions-sdk &&
+  #     cd /extensions &&
+  #     npm install &&
+  #     npm run dev"
